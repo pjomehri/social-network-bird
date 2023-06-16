@@ -26,19 +26,18 @@ export default async function handler(
       },
     });
 
-    console.log('Logging user ID: ', user?.id.slice(-1));
-
     if (!user) {
       throw new Error('Invalid ID');
     }
 
     let updatedFollowingIds = [...(user.followingIds || [])];
 
-    console.log(updatedFollowingIds);
-
     if (req.method === 'POST') {
+      console.log('1- Logging user ID: ', userId.slice(-1));
+      console.log('2- POST / Follow');
+      console.log('3- Following list, before push', updatedFollowingIds);
+
       updatedFollowingIds.push(userId);
-      console.log('POST / Follow');
 
       try {
         if (userId) {
@@ -64,15 +63,15 @@ export default async function handler(
     }
 
     if (req.method === 'DELETE') {
-      console.log('DELETE / unFollow');
+      console.log('1- Logging user ID / id to filter: ', userId.slice(-1));
+      console.log('2- DELETE / unFollow');
+      console.log('3- Following Id list after filter', updatedFollowingIds);
       updatedFollowingIds = updatedFollowingIds.filter(
         (followingId) => followingId !== userId
       );
-      console.log('ID to filter out: ', userId);
-      console.log('Following Id list after filter', updatedFollowingIds);
+      console.log('4- Following Id list after filter', updatedFollowingIds);
     }
 
-    console.log('Following Id list after filter out', updatedFollowingIds);
     const updatedUser = await prisma.user.update({
       where: {
         id: currentUser.id,

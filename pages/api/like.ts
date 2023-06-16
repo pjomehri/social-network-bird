@@ -32,8 +32,6 @@ export default async function handler(
 
     let updateLikeIds = [...(post.likeIds || [])];
 
-    console.log('updatedLikeIDS: ', updateLikeIds);
-
     if (req.method === 'POST') {
       updateLikeIds.push(currentUser.id);
 
@@ -60,10 +58,8 @@ export default async function handler(
       }
     }
 
-    console.log(currentUser.id);
     if (req.method === 'DELETE') {
       updateLikeIds = updateLikeIds.filter((id) => id !== currentUser.id);
-      console.log('after delete', updateLikeIds);
     }
 
     const updatedPost = await prisma.post.update({
