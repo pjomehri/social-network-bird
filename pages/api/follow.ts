@@ -30,14 +30,17 @@ export default async function handler(
       throw new Error('Invalid ID');
     }
 
-    let updatedFollowingIds = [...(user.followingIds || [])];
-
     if (req.method === 'POST') {
-      console.log('1- Logging user ID: ', userId.slice(-1));
-      console.log('2- POST / Follow');
-      console.log('3- Following list, before push', updatedFollowingIds);
-
-      updatedFollowingIds.push(userId);
+      const updatedUser = await prisma.user.update({
+        where: {
+          id: currentUser.id,
+        },
+        data: {
+          followingIds: {
+            push: userId,
+          },
+        },
+      });
 
       try {
         if (userId) {
@@ -60,27 +63,24 @@ export default async function handler(
       } catch (error) {
         console.log(error);
       }
+
+      return res.status(200).json(updatedUser);
     }
 
     if (req.method === 'DELETE') {
-      console.log('1- Logging user ID / id to filter: ', userId.slice(-1));
-      console.log('2- DELETE / unFollow');
-      console.log('3- Following Id list after filter', updatedFollowingIds);
-      updatedFollowingIds = updatedFollowingIds.filter(
-        (followingId) => followingId !== userId
-      );
-      console.log('4- Following Id list after filter', updatedFollowingIds);
-    }
+      const deletedUser = await prisma.user.update({
+        where: {
+          id: currentUser.id,
+        },
+        data: {
+          followingIds: {
+            set: user.followingIds.filter((id) => id !== userId),
+          },
+        },
+      });
 
-    const updatedUser = await prisma.user.update({
-      where: {
-        id: currentUser.id,
-      },
-      data: {
-        followingIds: updatedFollowingIds,
-      },
-    });
-    return res.status(200).json(updatedUser);
+      return res.status(200).json(deletedUser);
+    }
   } catch (error) {
     console.log(error);
     return res.status(400).end();
